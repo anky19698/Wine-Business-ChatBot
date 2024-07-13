@@ -13,7 +13,7 @@ import google.generativeai as genai
 
 def get_chunks():
     nlp = spacy.load("en_core_web_sm")
-    pdf_path = "C:\\Users\\ankit\\PycharmProjects\\Cricket Analysis\\Intership\\Corpus.pdf"
+    pdf_path = "Corpus.pdf"
     # loader = PyPDFLoader(pdf_path)
     pdf_text = extract_text(pdf_path)
     doc = nlp(pdf_text)
@@ -63,7 +63,7 @@ def load_chroma_collection(chunks):
 
 def get_llm_model():
     # Set up Hugging Face Token
-    hf_token = "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"
+    hf_token = st.secrets['hf_token']
     os.environ['HUGGINGFACEHUB_API_TOKEN'] = hf_token
 
     # Set up the LLAMA model
@@ -82,7 +82,7 @@ def get_llm_model():
 
 def get_gemini_model():
 # Set up gemini pro key
-    gemini_pro_key = "AIzaSyDFtTsWNJAHWU_HfN3z57DnfpI3r1Nx8U0"
+    gemini_pro_key = st.secrets['gemini_key']
     genai.configure(api_key=gemini_pro_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
     return model
