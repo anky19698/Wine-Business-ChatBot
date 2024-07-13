@@ -191,8 +191,8 @@ def get_gemini_response(model, prompt):
 
 def main():
     # Get Chunks
-    chunks = get_chunks()
-    print("Chunks:", chunks)
+    # chunks = get_chunks()
+    # print("Chunks:", chunks)
     # Load Chroma Collection
     # chroma_db = load_chroma_collection(chunks)
     chroma_db, collection = load_existing_chroma_collection()
