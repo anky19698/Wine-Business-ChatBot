@@ -1,9 +1,8 @@
-google.generativeai
-langchain_huggingface
 streamlit
 spacy
-langchain_core
-pdfminer
-langchain_huggingface
-langchain_community
 pdfminer.six
+google-generativeai
+langchain
+langchain-community
+langchain-huggingface
+chroma
