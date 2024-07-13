@@ -6,3 +6,4 @@ langchain_core
 pdfminer
 langchain_huggingface
 langchain_community
+pdfminer.six
