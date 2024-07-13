@@ -1,4 +1,5 @@
-from langchain_community.vectorstores import Chroma
+# from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores.chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from pdfminer.high_level import extract_text
 from langchain_core.documents import Document
