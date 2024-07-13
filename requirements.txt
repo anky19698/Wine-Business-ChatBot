@@ -6,3 +6,4 @@ pdfminer.six
 spacy
 google-generativeai
 chromadb
+pysqlite3-binary
