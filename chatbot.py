@@ -1,4 +1,4 @@
-# from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from pdfminer.high_level import extract_text
 from langchain_core.documents import Document
@@ -7,7 +7,7 @@ import streamlit as st
 import os
 from langchain_huggingface import HuggingFaceEndpoint
 import google.generativeai as genai
-from chromadb import Chroma
+# from chromadb import Chroma
 # from chromadb.embeddings import HuggingFaceEmbeddings
 
 def get_chunks():
