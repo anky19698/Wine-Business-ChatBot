@@ -34,29 +34,45 @@ def get_chunks():
     return combined_chunks
 
 
-def load_chroma_collection(chunks):
+def load_existing_chroma_collection():
     # Initialize the HuggingFace embeddings
     embeddings = HuggingFaceEmbeddings()
 
     # Load the Chroma database from disk
-    chroma_db = Chroma(persist_directory="data", 
-                    embedding_function=embeddings,
-                    collection_name="lc_chroma_demo")
+    chroma_db = Chroma(
+        persist_directory="data",
+        embedding_function=embeddings,
+        collection_name="lc_chroma_demo"
+    )
+
     # Get the collection from the Chroma database
     collection = chroma_db.get()
 
+    return chroma_db, collection
+
+def create_and_persist_chroma_collection(chunks):
+    # Initialize the HuggingFace embeddings
+    embeddings = HuggingFaceEmbeddings()
+
+    # Create a new Chroma database from the documents
+    chroma_db = Chroma.from_documents(
+        documents=chunks,
+        embedding=embeddings,
+        persist_directory="data",
+        collection_name="lc_chroma_demo"
+    )
+
+    # Save the Chroma database to disk
+    chroma_db.persist()
+
+    return chroma_db
+
+def load_chroma_collection(chunks):
+    chroma_db, collection = load_existing_chroma_collection()
+
     # If the collection is empty, create a new one
     if len(collection['ids']) == 0:
-        # Create a new Chroma database from the documents
-        chroma_db = Chroma.from_documents(
-            documents=chunks, 
-            embedding=embeddings, 
-            persist_directory="data",
-            collection_name="lc_chroma_demo"
-        )
-
-        # Save the Chroma database to disk
-        chroma_db.persist()
+        chroma_db = create_and_persist_chroma_collection(chunks)
 
     return chroma_db
 
@@ -82,7 +98,7 @@ def get_llm_model():
 
 def get_gemini_model():
 # Set up gemini pro key
-    gemini_pro_key = st.secrets['gemini_key']
+    gemini_pro_key = st.secrets['gemini_api_key']
     genai.configure(api_key=gemini_pro_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
     return model
@@ -178,7 +194,8 @@ def main():
     chunks = get_chunks()
     print("Chunks:", chunks)
     # Load Chroma Collection
-    chroma_db = load_chroma_collection(chunks)
+    # chroma_db = load_chroma_collection(chunks)
+    chroma_db, collection = load_existing_chroma_collection()
 
     # Get LLM Model
     # model = get_llm_model()
