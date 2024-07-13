@@ -289,7 +289,7 @@ def main():
     samples = get_samples()
 
     # Streamlit App
-    st.title(":wine_glass: Wine Business Chatbot")
+    st.title(":wine_glass:Wine Business Chatbot:speech_balloon:")
 
     user_question = "What hotels are located near Jessup Cellars?"
 
