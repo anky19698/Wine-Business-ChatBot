@@ -1,7 +1,8 @@
 streamlit
-spacy
-pdfminer.six
-google-generativeai
-langchain
 langchain-community
+langchain-core
 langchain-huggingface
+pdfminer.six
+spacy
+google-generativeai
+chromadb
