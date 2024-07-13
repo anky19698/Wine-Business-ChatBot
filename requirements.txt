@@ -1,0 +1,8 @@
+google.generativeai
+langchain_huggingface
+streamlit
+spacy
+langchain_core
+pdfminer
+langchain_huggingface
+langchain_community
