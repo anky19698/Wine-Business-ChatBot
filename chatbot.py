@@ -1,6 +1,7 @@
 # from langchain_community.vectorstores import Chroma
-from langchain_community.vectorstores.chroma import Chroma
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface import HuggingFaceEmbeddings
+from nltk.tokenize import sent_tokenize
 from pdfminer.high_level import extract_text
 from langchain_core.documents import Document
 import spacy
@@ -8,8 +9,8 @@ import streamlit as st
 import os
 from langchain_huggingface import HuggingFaceEndpoint
 import google.generativeai as genai
-# from chromadb import Chroma
-# from chromadb.embeddings import HuggingFaceEmbeddings
+import chromadb
+from chromadb.utils import embedding_functions
 
 def get_chunks():
     nlp = spacy.load("en_core_web_sm")
@@ -34,6 +35,23 @@ def get_chunks():
     return combined_chunks
 
 
+def load_existing_chromadb():
+    hf_token = st.secrets['hf_token']
+    os.environ['HUGGINGFACEHUB_API_TOKEN'] = hf_token
+    # Initialize the HuggingFace embeddings
+    embeddings = embedding_functions.HuggingFaceEmbeddingFunction(api_key=hf_token)
+
+    # Initialize the Chroma client
+    client = chromadb.PersistentClient(path="data")
+
+    # Get the collection from the Chroma database
+    collection = client.get_or_create_collection(
+        name="lc_chroma_demo",
+        embedding_function=embeddings
+    )
+
+    return client, collection
+
 def load_existing_chroma_collection():
     # Initialize the HuggingFace embeddings
     embeddings = HuggingFaceEmbeddings()
@@ -50,31 +68,74 @@ def load_existing_chroma_collection():
 
     return chroma_db, collection
 
-def create_and_persist_chroma_collection(chunks):
-    # Initialize the HuggingFace embeddings
-    embeddings = HuggingFaceEmbeddings()
 
-    # Create a new Chroma database from the documents
-    chroma_db = Chroma.from_documents(
-        documents=chunks,
-        embedding=embeddings,
-        persist_directory="data",
-        collection_name="lc_chroma_demo"
+def create_and_persist_chroma_collection(chunks):
+    hf_token = st.secrets['hf_token']
+    os.environ['HUGGINGFACEHUB_API_TOKEN'] = hf_token
+    # Initialize the HuggingFace embeddings
+    embeddings = embedding_functions.HuggingFaceEmbeddingFunction(api_key=hf_token)
+
+    # Initialize the Chroma client
+    client = chromadb.PersistentClient(path="data")
+
+    # Create a new collection
+    collection = client.create_collection(
+        name="lc_chroma_demo",
+        embedding_function=embeddings
     )
 
-    # Save the Chroma database to disk
-    chroma_db.persist()
+    # Add documents to the collection
+    collection.add(
+        documents=chunks,
+        ids=[f"id_{i}" for i in range(len(chunks))]
+    )
 
-    return chroma_db
+    return client, collection
+
 
 def load_chroma_collection(chunks):
-    chroma_db, collection = load_existing_chroma_collection()
+    client = chromadb.PersistentClient(path="data")
 
-    # If the collection is empty, create a new one
-    if len(collection['ids']) == 0:
-        chroma_db = create_and_persist_chroma_collection(chunks)
+    try:
+        collection = client.get_collection("lc_chroma_demo")
+    except ValueError:
+        # If the collection doesn't exist, create a new one
+        client, collection = create_and_persist_chroma_collection(chunks)
 
-    return chroma_db
+    # If the collection is empty, add documents
+    if collection.count() == 0:
+        collection.add(
+            documents=chunks,
+            ids=[f"id_{i}" for i in range(len(chunks))]
+        )
+
+    return client, collection
+
+# def create_and_persist_chroma_collection(chunks):
+#     # Initialize the HuggingFace embeddings
+#     embeddings = HuggingFaceEmbeddings()
+#
+#     # Create a new Chroma database from the documents
+#     chroma_db = Chroma.from_documents(
+#         documents=chunks,
+#         embedding=embeddings,
+#         persist_directory="data",
+#         collection_name="lc_chroma_demo"
+#     )
+#
+#     # Save the Chroma database to disk
+#     chroma_db.persist()
+#
+#     return chroma_db
+#
+# def load_chroma_collection(chunks):
+#     chroma_db, collection = load_existing_chroma_collection()
+#
+#     # If the collection is empty, create a new one
+#     if len(collection['ids']) == 0:
+#         chroma_db = create_and_persist_chroma_collection(chunks)
+#
+#     return chroma_db
 
 
 def get_llm_model():
@@ -98,7 +159,7 @@ def get_llm_model():
 
 def get_gemini_model():
 # Set up gemini pro key
-    gemini_pro_key = st.secrets['gemini_api_key']
+    gemini_pro_key = st.secrets['gemini_pro_key']
     genai.configure(api_key=gemini_pro_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
     return model
@@ -131,6 +192,25 @@ def get_samples():
 
     return samples
 
+
+def get_similar_document_chroma(collection, user_question):
+    # Perform a similarity search
+    results = collection.query(
+        query_texts=[user_question],
+        n_results=1,
+        include=['documents', 'distances']
+    )
+
+    # Check if we got any results
+    if results['distances'][0] and results['documents'][0]:
+        distance = results['distances'][0][0]
+        document = results['documents'][0][0]
+
+        # You may need to adjust this threshold based on your specific use case
+        if distance > 0.5:  # Lower distance means higher similarity
+            return document
+
+    return "Empty"
 
 def get_similar_document(chroma_db, user_question):
     
@@ -194,9 +274,10 @@ def main():
     # chunks = get_chunks()
     # print("Chunks:", chunks)
     # Load Chroma Collection
-    # chroma_db = load_chroma_collection(chunks)
-    chroma_db, collection = load_existing_chroma_collection()
+    # client, collection = create_and_persist_chroma_collection(chunks)
+    # chroma_db, collection = load_existing_chroma_collection()
 
+    client, collection = load_existing_chromadb()
     # Get LLM Model
     # model = get_llm_model()
     model = get_gemini_model()
@@ -238,7 +319,11 @@ def main():
 
                 # try:
                     # Get Corpus
-                    corpus = get_similar_document(chroma_db, user_question)
+                    # corpus = get_similar_document(chroma_db, user_question)
+
+
+
+                    corpus = get_similar_document_chroma(collection, user_question)
 
                     # Get Prompt
                     prompt = get_prompt(corpus, samples, user_question, st.session_state.chat_history)
