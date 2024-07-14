@@ -2,7 +2,9 @@
 
 This project implements an AI-powered chatbot for a wine business using retrieval-augmented generation. The chatbot can answer customer queries about wines, winemakers, and related information based on a provided corpus. 
 
+
 ## Chatbot Web App: https://wine-business-chatbot.streamlit.app/
+
 
 ## Features
 
@@ -11,6 +13,7 @@ This project implements an AI-powered chatbot for a wine business using retrieva
 - Integration with Hugging Face and Google's Generative AI (Gemini) models
 - Streamlit-based web interface for easy interaction
 - Context-aware responses using chat history
+
 
 ## Requirements
 
@@ -22,6 +25,7 @@ This project implements an AI-powered chatbot for a wine business using retrieva
 - PDFMiner
 - spaCy
 - LangChain
+
 
 ## Installation
 
@@ -45,6 +49,7 @@ python -m spacy download en_core_web_sm
 - `hf_token`: Hugging Face API token
 - `gemini_pro_key`: Google Gemini Pro API key
 
+
 ## Usage
 
 You can interact with the Wine Business Chatbot in two ways:
@@ -66,12 +71,14 @@ streamlit run app.py
 
 Navigate to the provided local URL in your web browser to interact with the chatbot.
 
+
 ## Project Structure
 
 - `app.py`: Main application file containing the Streamlit interface and chatbot logic
 - `Corpus.pdf`: Source PDF containing wine business information
 - `db/`: Directory for storing the ChromaDB database
 - `requirements.txt`: List of Python dependencies
+
 
 ## Future Enhancements
 
@@ -85,6 +92,7 @@ Navigate to the provided local URL in your web browser to interact with the chat
 - E-commerce integration
 - Wine recommendation system
 - Social media sharing features
+
 
 ## Contributing
 
