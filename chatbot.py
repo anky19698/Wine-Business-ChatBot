@@ -45,31 +45,15 @@ def load_existing_chromadb():
     embeddings = embedding_functions.HuggingFaceEmbeddingFunction(api_key=hf_token)
 
     # Initialize the Chroma client
-    client = chromadb.PersistentClient(path="data")
+    client = chromadb.PersistentClient(path="db")
 
     # Get the collection from the Chroma database
     collection = client.get_or_create_collection(
-        name="lc_chroma_demo",
+        name="chroma_corpus",
         embedding_function=embeddings
     )
 
     return client, collection
-
-def load_existing_chroma_collection():
-    # Initialize the HuggingFace embeddings
-    embeddings = HuggingFaceEmbeddings()
-
-    # Load the Chroma database from disk
-    chroma_db = Chroma(
-        persist_directory="data",
-        embedding_function=embeddings,
-        collection_name="lc_chroma_demo"
-    )
-
-    # Get the collection from the Chroma database
-    collection = chroma_db.get()
-
-    return chroma_db, collection
 
 
 def create_and_persist_chroma_collection(chunks):
@@ -79,66 +63,35 @@ def create_and_persist_chroma_collection(chunks):
     embeddings = embedding_functions.HuggingFaceEmbeddingFunction(api_key=hf_token)
 
     # Initialize the Chroma client
-    client = chromadb.PersistentClient(path="data")
+    client = chromadb.PersistentClient(path="db")
 
     # Create a new collection
     collection = client.create_collection(
-        name="lc_chroma_demo",
+        name="chroma_corpus",
         embedding_function=embeddings
     )
 
+    # Convert all chunks to strings
+    string_chunks = []
+    for chunk in chunks:
+        if isinstance(chunk, Document):
+            # Assuming Document has a 'page_content' attribute
+            string_chunks.append(str(chunk.page_content))
+        elif isinstance(chunk, dict):
+            # Convert dictionary to a string representation
+            string_chunks.append(str(chunk))
+        else:
+            # For any other type, use str() function
+            string_chunks.append(str(chunk))
+
     # Add documents to the collection
     collection.add(
-        documents=chunks,
-        ids=[f"id_{i}" for i in range(len(chunks))]
+        documents=string_chunks,
+        ids=[f"id_{i}" for i in range(len(string_chunks))]
     )
 
     return client, collection
 
-
-def load_chroma_collection(chunks):
-    client = chromadb.PersistentClient(path="data")
-
-    try:
-        collection = client.get_collection("lc_chroma_demo")
-    except ValueError:
-        # If the collection doesn't exist, create a new one
-        client, collection = create_and_persist_chroma_collection(chunks)
-
-    # If the collection is empty, add documents
-    if collection.count() == 0:
-        collection.add(
-            documents=chunks,
-            ids=[f"id_{i}" for i in range(len(chunks))]
-        )
-
-    return client, collection
-
-# def create_and_persist_chroma_collection(chunks):
-#     # Initialize the HuggingFace embeddings
-#     embeddings = HuggingFaceEmbeddings()
-#
-#     # Create a new Chroma database from the documents
-#     chroma_db = Chroma.from_documents(
-#         documents=chunks,
-#         embedding=embeddings,
-#         persist_directory="data",
-#         collection_name="lc_chroma_demo"
-#     )
-#
-#     # Save the Chroma database to disk
-#     chroma_db.persist()
-#
-#     return chroma_db
-#
-# def load_chroma_collection(chunks):
-#     chroma_db, collection = load_existing_chroma_collection()
-#
-#     # If the collection is empty, create a new one
-#     if len(collection['ids']) == 0:
-#         chroma_db = create_and_persist_chroma_collection(chunks)
-#
-#     return chroma_db
 
 
 def get_llm_model():
