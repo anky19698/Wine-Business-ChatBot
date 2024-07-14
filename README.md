@@ -2,7 +2,7 @@
 
 This project implements an AI-powered chatbot for a wine business using retrieval-augmented generation. The chatbot can answer customer queries about wines, winemakers, and related information based on a provided corpus. 
 
-## Here is Chatbot Web App: https://wine-business-chatbot.streamlit.app/
+## Chatbot Web App: https://wine-business-chatbot.streamlit.app/
 
 ## Features
 
