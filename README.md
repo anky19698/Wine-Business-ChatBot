@@ -1,6 +1,8 @@
 # Wine Business Chatbot
 
-This project implements an AI-powered chatbot for a wine business using retrieval-augmented generation. The chatbot can answer customer queries about wines, winemakers, and related information based on a provided corpus.
+This project implements an AI-powered chatbot for a wine business using retrieval-augmented generation. The chatbot can answer customer queries about wines, winemakers, and related information based on a provided corpus. 
+
+## Here is Chatbot Web App: https://wine-business-chatbot.streamlit.app/
 
 ## Features
 
@@ -44,6 +46,18 @@ python -m spacy download en_core_web_sm
 - `gemini_pro_key`: Google Gemini Pro API key
 
 ## Usage
+
+You can interact with the Wine Business Chatbot in two ways:
+
+1. Visit the live website:
+   
+   The chatbot is deployed and accessible at: https://wine-business-chatbot.streamlit.app/
+   
+   Simply open this link in your web browser to start using the chatbot immediately.
+
+2. Run locally:
+
+   If you want to run the application on your local machine:
 
 Run the Streamlit app:
 ```
